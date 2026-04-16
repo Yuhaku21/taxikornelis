@@ -1,11 +1,202 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Kornelis Taxi</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: #1f3b63;
+            padding: 15px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .navbar-nav .nav-link {
+            color: #fff;
+            margin: 0 10px;
+            font-weight: 500;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #ff7a00;
+        }
+
+        /* HERO */
+        .hero {
+            position: relative;
+            height: 90vh;
+            background: url('/asset/kornelis1.jpeg') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content {
+            position: relative;
+            color: #fff;
+            max-width: 700px;
+            padding: 0 15px;
+        }
+
+        .hero h1 {
+            font-weight: 600;
+            font-size: 32px;
+        }
+
+        .hero p {
+            font-size: 16px;
+            margin: 15px 0;
+        }
+
+        .btn-orange {
+            background-color: #ff7a00;
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 500;
+        }
+
+        .btn-orange:hover {
+            background-color: #e66d00;
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Kornelis Taxi</h2>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="/asset/logofix.png" alt="" width="150px">
+            </a>
+
+            <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+                ☰
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-lg-center" id="navbarNav">
+                <ul class="navbar-nav text-center">
+                    <li class="nav-item"><a class="nav-link" href="#">Tentang</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Galeri</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Peta</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Ulasan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Kontak</a></li>
+
+                    <!-- MOBILE BUTTON -->
+                    <li class="nav-item d-lg-none mt-3">
+                        <button id="translateBtnMobile" class="btn btn-light w-100">🌐 English</button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- DESKTOP BUTTON -->
+            <button id="translateBtn" class="btn btn-outline-light d-none d-lg-block">🌐 EN</button>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Layanan Taxi Terbaik di Nusa Lembongan</h1>
+            <p>Kami siap mengantar Anda dengan aman, cepat, dan nyaman ke tujuan Anda</p>
+            <button class="btn-orange">Pesan Sekarang</button>
+        </div>
+    </section>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let currentLang = localStorage.getItem("lang") || "id";
+
+        // Ambil element yang mau di translate
+        const elements = document.querySelectorAll("h1, p, a, button");
+
+        // Simpan teks asli
+        const originalTexts = [];
+        elements.forEach(el => {
+            originalTexts.push(el.innerText);
+        });
+
+        // API translate
+        async function translateText(text, targetLang) {
+            const res = await fetch(
+                `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`
+            );
+            const data = await res.json();
+            return data[0][0][0];
+        }
+
+        // Translate halaman
+        async function translatePage(lang) {
+            for (let i = 0; i < elements.length; i++) {
+                if (lang === "id") {
+                    elements[i].innerText = originalTexts[i];
+                } else {
+                    let translated = await translateText(originalTexts[i], "en");
+                    elements[i].innerText = translated;
+                }
+            }
+
+            localStorage.setItem("lang", lang);
+            updateButton();
+        }
+
+        // Update tombol
+        function updateButton() {
+            const btn = document.getElementById("translateBtn");
+            const btnMobile = document.getElementById("translateBtnMobile");
+
+            if (btn) btn.textContent = currentLang === "id" ? "🌐 EN" : "🌐 ID";
+            if (btnMobile) btnMobile.textContent = currentLang === "id" ? "🌐 English" : "🌐 Indonesia";
+        }
+
+        // Event
+        document.getElementById("translateBtn").addEventListener("click", toggleLang);
+        document.getElementById("translateBtnMobile").addEventListener("click", toggleLang);
+
+        function toggleLang() {
+            currentLang = currentLang === "id" ? "en" : "id";
+            translatePage(currentLang);
+        }
+
+        // Init
+        updateButton();
+
+        if (currentLang === "en") {
+            translatePage("en");
+        }
+    </script>
+
 </body>
+
 </html>
